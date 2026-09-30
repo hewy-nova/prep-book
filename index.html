@@ -1,0 +1,661 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>html{color-scheme:light}body{margin:0;font:14px/1.5 system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Matt &amp; Louise Prep Book</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=Permanent+Marker&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: a prep board. Recipe cards read like labeled deli containers (masking-tape name strip), grid by meal type, planner + merged Walmart list below. */
+:root{
+  --bg:#EDF0EC; --surface:#FAFBF8; --sunk:#E3E8E3; --ink:#18211D; --muted:#56635C; --line:#CDD5CE;
+  --accent:#2F6B4F; --accent-ink:#FFFFFF; --tape:#EBCB73; --tape-ink:#33280C; --warn:#A8452C; --ok:#2F6B4F;
+  --shadow:0 1px 0 rgba(24,33,29,.06),0 6px 18px -10px rgba(24,33,29,.25);
+  --f-display:"Archivo",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-body:"Archivo",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-marker:"Permanent Marker","Comic Sans MS","Marker Felt",cursive;
+  --f-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#111714; --surface:#1A221E; --sunk:#151C18; --ink:#E5ECE7; --muted:#9BA9A1; --line:#2C3833;
+  --accent:#72C298; --accent-ink:#0D1A13; --tape:#C9A651; --tape-ink:#1C1606; --warn:#E58268; --ok:#72C298;
+  --shadow:0 1px 0 rgba(0,0,0,.3),0 8px 20px -12px rgba(0,0,0,.7); color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --bg:#111714; --surface:#1A221E; --sunk:#151C18; --ink:#E5ECE7; --muted:#9BA9A1; --line:#2C3833;
+  --accent:#72C298; --accent-ink:#0D1A13; --tape:#C9A651; --tape-ink:#1C1606; --warn:#E58268; --ok:#72C298;
+  --shadow:0 1px 0 rgba(0,0,0,.3),0 8px 20px -12px rgba(0,0,0,.7); color-scheme:dark;}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5;padding-inline:16px;padding-block:0 64px}
+.wrap{max-width:1120px;margin:0 auto}
+a{color:var(--accent)}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0}
+.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+
+/* header */
+header.top{padding-block:32px 20px;display:grid;gap:14px}
+header.top h1{font-size:clamp(30px,5vw,46px);font-weight:800;font-stretch:112%;letter-spacing:-.01em;line-height:1.05}
+header.top h1 span{font-family:var(--f-marker);font-weight:400;font-stretch:100%;background:var(--tape);color:var(--tape-ink);padding:0 .25em;display:inline-block;transform:rotate(-1.5deg);letter-spacing:0}
+.facts{display:flex;flex-wrap:wrap;gap:8px 18px;color:var(--muted);font-size:14px;max-width:780px}
+.facts b{color:var(--ink);font-weight:650}
+
+/* toolbar */
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:10px;border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:var(--surface);padding:6px 12px;border-radius:999px;cursor:pointer;font-size:14px;font-weight:550}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.weekbtn{border:0;background:var(--accent);color:var(--accent-ink);padding:7px 14px;border-radius:999px;font-weight:700;cursor:pointer;font-size:14px;text-decoration:none}
+
+section.block{padding-block:28px 8px}
+.sechead{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.sechead h2{font-size:24px;font-weight:800;font-stretch:108%}
+.sechead p{margin:0;color:var(--muted);font-size:14px}
+
+/* cards */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);display:flex;flex-direction:column;overflow:hidden;transition:transform .15s ease,border-color .15s}
+.card:hover{transform:translateY(-2px);border-color:var(--muted)}
+.card.inweek{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
+.open{all:unset;cursor:pointer;display:flex;flex-direction:column;gap:10px;padding:18px 16px 12px;flex:1}
+.open:focus-visible{outline:2px solid var(--accent);outline-offset:-4px}
+.tape{align-self:flex-start;background:var(--tape);color:var(--tape-ink);font-family:var(--f-marker);font-size:19px;line-height:1.2;padding:4px 10px 5px;transform:rotate(-1.2deg);max-width:100%;box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.card:nth-child(3n+2) .tape{transform:rotate(.8deg)}
+.card:nth-child(3n) .tape{transform:rotate(-.4deg)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;border-top:1px dashed var(--line);border-bottom:1px dashed var(--line);padding-block:8px}
+.stat{display:grid;gap:1px}
+.stat .k{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.stat .v{font-family:var(--f-mono);font-weight:700;font-size:15px;font-variant-numeric:tabular-nums}
+.meta{font-size:12px;color:var(--muted);margin-top:-4px}
+.mt{overflow-x:auto}
+.mt table{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}
+.mt th,.mt td{padding:7px 8px;text-align:right;border-bottom:1px dashed var(--line)}
+.mt thead th{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.mt tbody th{text-align:left;font-weight:700}
+.mt td{font-family:var(--f-mono);font-weight:700}
+.blurb{margin:0;color:var(--muted);font-size:13.5px}
+.tags{display:flex;flex-wrap:wrap;gap:5px}
+.tag{font-size:11.5px;padding:2px 8px;border-radius:4px;background:var(--sunk);color:var(--muted);font-weight:600}
+.tag.five{background:var(--accent);color:var(--accent-ink)}
+.cardfoot{display:flex;border-top:1px solid var(--line)}
+.cardfoot button{flex:1;border:0;background:none;padding:10px;cursor:pointer;font-size:13.5px;font-weight:650}
+.cardfoot button+button{border-left:1px solid var(--line)}
+.cardfoot .add[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+
+/* dialog */
+dialog{border:0;padding:0;background:var(--surface);color:var(--ink);border-radius:14px;width:min(760px,calc(100vw - 24px));max-height:calc(100dvh - 32px);box-shadow:0 30px 80px -20px rgba(0,0,0,.5)}
+dialog::backdrop{background:rgba(10,16,13,.55)}
+.dlg{display:flex;flex-direction:column;max-height:calc(100dvh - 32px)}
+.dlghead{padding:22px 22px 14px;border-bottom:1px solid var(--line);display:grid;gap:12px;position:relative}
+.dlghead .tape{font-size:24px;max-width:calc(100% - 48px)}
+.x{position:absolute;top:12px;right:12px;z-index:2;border:1px solid var(--line);background:var(--surface);border-radius:999px;width:36px;height:36px;cursor:pointer;font-size:18px;line-height:1}
+.dlgbody{overflow:auto;padding:18px 22px 26px;display:grid;gap:22px}
+.dlgbody h3{font-size:15px;font-weight:750;letter-spacing:.06em;text-transform:uppercase;font-stretch:110%;margin-bottom:8px}
+.serve{background:var(--sunk);border-radius:8px;padding:10px 12px;font-size:14px}
+.ings{list-style:none;margin:0;padding:0;display:grid;gap:0}
+.ings li{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:7px 0;border-bottom:1px dashed var(--line);font-size:14.5px}
+.ings li span{min-width:0}
+.wm{flex:none;font-size:12.5px;font-weight:650;text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:2px 9px;white-space:nowrap}
+.wm:hover{border-color:var(--accent)}
+.pantrytag{flex:none;font-size:11px;color:var(--muted)}
+ol.steps{margin:0;padding:0;list-style:none;counter-reset:s;display:grid;gap:10px}
+ol.steps>li{counter-increment:s;display:grid;grid-template-columns:30px 1fr;gap:10px;align-items:start;cursor:pointer}
+ol.steps>li::before{content:counter(s);font-family:var(--f-mono);font-weight:700;font-size:13px;width:26px;height:26px;border-radius:50%;border:1.5px solid var(--ink);display:grid;place-items:center;margin-top:1px}
+ol.steps>li.done{color:var(--muted)}
+ol.steps>li.done::before{content:"✓";background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+ol.steps>li.done .st{text-decoration:line-through;text-decoration-color:var(--line)}
+ol.steps ol{margin:6px 0 0;padding-left:20px;display:grid;gap:4px;list-style:lower-alpha}
+.note{border-left:3px solid var(--tape);padding:6px 12px;font-size:14px;background:var(--sunk);border-radius:0 6px 6px 0}
+.dlgfoot{border-top:1px solid var(--line);padding:12px 22px;display:flex;gap:10px;justify-content:space-between;align-items:center;flex-wrap:wrap}
+.dlgfoot .add{border:1px solid var(--accent);background:none;color:var(--accent);padding:8px 16px;border-radius:999px;font-weight:700;cursor:pointer}
+.dlgfoot .add[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.hint{font-size:12.5px;color:var(--muted)}
+
+/* planner */
+.planner{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.5fr);gap:20px;align-items:start}
+@media (max-width:820px){.planner{grid-template-columns:1fr}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px}
+.sel{list-style:none;margin:0 0 12px;padding:0;display:grid;gap:6px}
+.sel li{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:8px 10px;background:var(--sunk);border-radius:6px;font-size:14px}
+.sel li button{border:0;background:none;cursor:pointer;color:var(--muted);font-size:16px}
+.empty{color:var(--muted);font-size:14px;margin:0 0 12px}
+.meter{height:10px;border-radius:5px;background:var(--sunk);position:relative;overflow:hidden;margin:6px 0}
+.meter i{position:absolute;inset:0 auto 0 0;background:var(--accent);border-radius:5px}
+.meter b{position:absolute;top:0;bottom:0;width:2px;background:var(--ink);opacity:.5}
+.budget{display:flex;justify-content:space-between;font-size:13px;color:var(--muted)}
+.budget strong{font-family:var(--f-mono);color:var(--ink);font-size:20px}
+.msg{font-size:13.5px;padding:8px 10px;border-radius:6px;margin-top:10px}
+.msg.warn{color:var(--warn);background:var(--sunk)}
+.msg.ok{color:var(--ok);background:var(--sunk)}
+.presets{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-top:12px}
+.preset{border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:8px 10px;text-align:left;cursor:pointer;font-size:12.5px;line-height:1.35;display:grid;gap:2px}
+.preset:hover{border-color:var(--accent)}
+.preset b{font-size:13px}
+.preset .num{color:var(--muted)}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 14px;cursor:pointer;font-weight:650;font-size:13.5px}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.shop h4{margin:16px 0 6px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-family:var(--f-display)}
+.shop h4:first-child{margin-top:0}
+.shop ul{list-style:none;margin:0;padding:0}
+.shop li{display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:8px;align-items:baseline;padding:6px 0;border-bottom:1px dashed var(--line);font-size:14px}
+.shop li input{margin:0;transform:translateY(2px);accent-color:var(--accent)}
+.shop li.got .nm{text-decoration:line-through;color:var(--muted)}
+.shop .qty{font-family:var(--f-mono);font-size:12.5px;color:var(--muted);margin-left:6px}
+.shop .for{display:block;font-size:12px;color:var(--muted)}
+
+/* basics + gear */
+details.basic{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:0 16px;margin-bottom:10px}
+details.basic summary{cursor:pointer;padding:14px 0;font-weight:700;font-family:var(--f-display);font-size:16px}
+details.basic[open] summary{border-bottom:1px dashed var(--line);margin-bottom:10px}
+details.basic ol,details.basic ul{margin:0 0 14px;padding-left:20px;display:grid;gap:5px}
+details.basic p{margin:0 0 12px}
+.temps{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-bottom:14px}
+.temp{background:var(--sunk);border-radius:8px;padding:10px}
+.temp .num{font-size:22px;font-weight:700;display:block}
+.gear{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.gear .panel{display:grid;gap:6px}
+.gear .panel b{font-size:15px}
+.gear .panel p{margin:0;color:var(--muted);font-size:13.5px}
+.gear .panel a{justify-self:start}
+footer{margin-top:36px;color:var(--muted);font-size:12.5px;max-width:760px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+@media (max-width:480px){.dlghead,.dlgbody,.dlgfoot{padding-left:16px;padding-right:16px}.dlghead .tape{font-size:20px}}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="eyebrow">One prep session · 30 containers a week</div>
+    <h1>Matt &amp; Louise <span>Prep Book</span></h1>
+    <div class="facts">
+      <div><b>Every recipe covers 5 days</b> for both of you</div>
+      <div><b>10 containers</b>: 5 yours, 5 Louise's at about 2/3 the meat</div>
+      <div>Macros on cards are <b>your</b> container</div>
+      <div>Pick <b>1 breakfast + 2 mains</b> a week</div>
+    </div>
+  </header>
+
+  <div class="bar">
+    <div class="chips" role="group" aria-label="Filter recipes">
+      <button class="chip" data-f="all" aria-pressed="true">All</button>
+      <button class="chip" data-f="breakfast" aria-pressed="false">Breakfast</button>
+      <button class="chip" data-f="main" aria-pressed="false">Lunch &amp; dinner</button>
+    </div>
+    <a class="weekbtn" href="#week" id="weekJump">This week · 0</a>
+  </div>
+
+  <section class="block" id="sec-breakfast">
+    <div class="sechead"><h2>Breakfast</h2><p>Grab and go. Freeze or fridge, eat cold or reheat in 2–3 min.</p></div>
+    <div class="grid" id="grid-breakfast"></div>
+  </section>
+
+  <section class="block" id="sec-main">
+    <div class="sechead"><h2>Lunch &amp; dinner</h2><p>Keeps 4 days in the fridge. Freeze Thursday and Friday.</p></div>
+    <div class="grid" id="grid-main"></div>
+  </section>
+
+  <section class="block" id="week">
+    <div class="sechead"><h2>This week</h2><p>Add recipes or load a rotation week. The Walmart list builds itself.</p></div>
+    <div class="planner">
+      <div class="panel">
+        <div class="eyebrow">Picked</div>
+        <ul class="sel" id="selList"></ul>
+        <p class="empty" id="selEmpty">Nothing picked yet. Tap “+ Week” on a card, or load a week below.</p>
+        <div class="budget"><span>Estimated groceries</span><strong id="total">$0</strong></div>
+        <div class="meter" aria-hidden="true"><i id="meterFill" style="width:0"></i><b style="left:66.6%"></b></div>
+        <div class="budget"><span class="num">$0</span><span>target $100–120</span><span class="num">$150</span></div>
+        <div id="weekMsg"></div>
+        <div class="eyebrow" style="margin-top:18px">8-week rotation</div>
+        <div class="presets" id="presets"></div>
+        <div class="row"><button class="btn" id="clearWeek">Clear week</button></div>
+      </div>
+      <div class="panel shop">
+        <div class="sechead" style="margin-bottom:8px"><h2 style="font-size:19px">Walmart list</h2>
+          <div class="row" style="margin:0"><button class="btn primary" id="copyList">Copy list</button><button class="btn" id="uncheck">Uncheck all</button></div></div>
+        <p class="hint" style="margin:0 0 12px">Each link opens a Walmart search for that item. Pick the Great Value or cheapest per-lb option. Quantities are combined across your picks.</p>
+        <div id="shop"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="basics">
+    <div class="sechead"><h2>Basics</h2><p>Used in almost every recipe.</p></div>
+    <details class="basic" open><summary>Doneness temperatures</summary>
+      <div class="temps">
+        <div class="temp"><span class="num">165°F</span>Chicken breast</div>
+        <div class="temp"><span class="num">175°F</span>Chicken thighs</div>
+        <div class="temp"><span class="num">160°F</span>Ground meat</div>
+        <div class="temp"><span class="num">130°F</span>Steak (cooks more on reheat)</div>
+      </div>
+      <p>No thermometer: cut the thickest piece open. Chicken should be white all the way through, ground meat should have no pink.</p>
+    </details>
+    <details class="basic"><summary>Rice on the stovetop</summary>
+      <p>For every 1 cup dry long-grain white rice: 1.5 cups water and 1/2 tsp salt.</p>
+      <ol>
+        <li>Rinse the rice in a fine mesh strainer for about 30 seconds, until the water runs mostly clear.</li>
+        <li>Add rice, water and salt to a lidded pot. For 3–4 cups dry rice, use a pot of at least 5 quarts.</li>
+        <li>Bring to a boil on high.</li>
+        <li>Stir once, cover, turn to the lowest setting. Set a timer for 18 minutes. Don't lift the lid.</li>
+        <li>Turn off the heat and leave it covered 10 more minutes.</li>
+        <li>Fluff with a fork.</li>
+      </ol>
+      <p>A rice cooker removes this step: fill water to the line for the number of cups.</p>
+    </details>
+    <details class="basic"><summary>Portioning, cooling and storage</summary>
+      <ul>
+        <li>Use the same scoop for every container. Split rice and veg evenly across all 10.</li>
+        <li>Meat: 3 scoops in each of your containers, 2 in each of Louise's.</li>
+        <li>Let hot food sit spread out 20–30 minutes before lidding.</li>
+        <li>Cooked food is good 4 days in the fridge. Freeze Thursday and Friday containers and move each to the fridge the night before.</li>
+        <li>Sauces, yogurt, tzatziki and salsa go in small side cups. Add them after reheating.</li>
+      </ul>
+    </details>
+    <details class="basic"><summary>Prep session order (90–120 min)</summary>
+      <ol>
+        <li>Start the slow cooker or Instant Pot first if salsa chicken is on the list.</li>
+        <li>Cook all the week's rice at once. Spread any fried-rice rice on a sheet pan and refrigerate it.</li>
+        <li>Preheat the oven and get sheet pan items in.</li>
+        <li>While the oven runs, cook the stovetop protein.</li>
+        <li>Do breakfast last. Burritos and sandwiches need cooling time; egg bakes can go in as the oven frees up.</li>
+        <li>Cool everything 20–30 minutes, lid, label with the day, freeze Thu/Fri.</li>
+      </ol>
+    </details>
+  </section>
+
+  <section class="block" id="gear">
+    <div class="sechead"><h2>One-time gear</h2><p>Cheap stuff that makes the session faster. Buy once.</p></div>
+    <div class="gear" id="gearGrid"></div>
+  </section>
+
+  <footer>Costs are estimates at Walmart/WinCo-level prices for Mon–Fri containers for two, not counting whey, milk you drink, or weekend meals. Prices vary by store; check your Fresno/Clovis store's pickup prices before checkout.</footer>
+</div>
+
+<dialog id="dlg" aria-labelledby="dlgTitle">
+  <div class="dlg">
+    <div class="dlghead">
+      <button class="x" id="dlgClose" aria-label="Close">×</button>
+      <div class="tape" id="dlgTitle"></div>
+      <div class="stats" id="dlgStats"></div>
+      <div class="tags" id="dlgTags"></div>
+    </div>
+    <div class="dlgbody" id="dlgBody"></div>
+    <div class="dlgfoot">
+      <span class="hint">Tap a step to check it off.</span>
+      <button class="add" id="dlgAdd" aria-pressed="false">+ Add to this week</button>
+    </div>
+  </div>
+</dialog>
+
+<script>
+const WM = q => "https://www.walmart.com/search?q=" + encodeURIComponent(q);
+const AISLES = ["Meat & seafood","Dairy & eggs","Produce","Frozen","Bread & grains","Canned & jars","Pantry (check before you buy)"];
+
+// key: [label, walmart search, aisle index, pantry?]
+const C = {
+  turkey:["Ground turkey, 93% lean","93% lean ground turkey",0],
+  chThigh:["Boneless skinless chicken thighs","boneless skinless chicken thighs family pack",0],
+  chBreast:["Boneless skinless chicken breast","Great Value boneless skinless chicken breasts",0],
+  canCh:["Canned chicken breast, 12.5 oz","Great Value chunk chicken breast 12.5 oz can",0],
+  beef:["Ground beef, 90/10","90% lean 10% fat ground beef",0],
+  sirloin:["Top sirloin steak","top sirloin steak",0],
+  shrimp:["Frozen raw peeled shrimp","Great Value frozen raw peeled deveined shrimp 2 lb",0],
+  eggs:["Large eggs","Great Value large white eggs 60 count",1],
+  cheddar:["Shredded cheddar","Great Value shredded sharp cheddar cheese",1],
+  cheeseSlice:["American cheese slices","Great Value American cheese slices",1],
+  cottage:["Cottage cheese","Great Value cottage cheese 24 oz",1],
+  yogurt:["Nonfat plain Greek yogurt","Great Value nonfat plain Greek yogurt 32 oz",1],
+  milk:["Milk","Great Value milk gallon",1],
+  parm:["Grated parmesan","Great Value grated parmesan cheese",1],
+  creamCheese:["Cream cheese","Great Value cream cheese 8 oz",1],
+  bellPepper:["Bell peppers","bell peppers",2],
+  onion:["Yellow onions","yellow onions",2],
+  redOnion:["Red onions","red onion",2],
+  spinach:["Baby spinach","Marketside baby spinach",2],
+  babyPot:["Baby potatoes","baby gold potatoes",2],
+  russet:["Russet potatoes","russet potatoes 5 lb bag",2],
+  sweetPot:["Sweet potatoes","sweet potatoes",2],
+  garlic:["Garlic (or minced garlic jar)","Great Value minced garlic jar",2],
+  ginger:["Fresh ginger (or ground ginger)","fresh ginger root",2],
+  lemon:["Lemons","lemons",2],
+  lime:["Limes","limes",2],
+  cucumber:["Cucumber","cucumber",2],
+  banana:["Bananas","bananas",2],
+  greenOnion:["Green onions","green onions bunch",2],
+  celery:["Celery","celery hearts",2],
+  lettuce:["Shredded lettuce (optional)","Marketside shredded iceberg lettuce",2],
+  hashbrown:["Frozen diced hash browns","Great Value frozen diced hash brown potatoes",3],
+  broccoli:["Frozen broccoli florets","Great Value frozen broccoli florets",3],
+  corn:["Frozen corn","Great Value frozen whole kernel corn",3],
+  peasCarrots:["Frozen peas & carrots","Great Value frozen peas and carrots",3],
+  peas:["Frozen peas","Great Value frozen sweet peas",3],
+  greenBeans:["Frozen green beans","Great Value frozen cut green beans",3],
+  edamame:["Frozen shelled edamame","frozen shelled edamame",3],
+  berries:["Frozen mixed berries","Great Value frozen mixed berries",3],
+  blueberries:["Frozen blueberries","Great Value frozen blueberries",3],
+  rice:["Long-grain white rice","Great Value long grain enriched rice 20 lb",4],
+  bread:["Whole wheat bread (2 loaves)","Great Value 100% whole wheat bread",4],
+  tortilla:["Burrito-size flour tortillas","Great Value burrito size flour tortillas",4],
+  oats:["Old-fashioned oats","Great Value old fashioned oats 42 oz",4],
+  englishMuffin:["English muffins","Great Value English muffins",4],
+  pasta:["Pasta (penne or rotini)","Great Value penne pasta",4],
+  breadcrumbs:["Plain breadcrumbs","Great Value plain bread crumbs",4],
+  blackBeans:["Black beans, 15 oz","Great Value black beans 15 oz",5],
+  pintoBeans:["Pinto beans, 15 oz","Great Value pinto beans 15 oz",5],
+  beansMix:["Kidney/black/pinto beans, 15 oz","Great Value dark red kidney beans 15 oz",5],
+  salsa:["Salsa, 16 oz jar","Great Value medium chunky salsa 16 oz",5],
+  marinara:["Marinara, 24 oz jar","Great Value marinara pasta sauce 24 oz",5],
+  crushedTom:["Crushed tomatoes, 28 oz","Great Value crushed tomatoes 28 oz",5],
+  tomSauce:["Tomato sauce, 15 oz","Great Value tomato sauce 15 oz",5],
+  bbq:["BBQ sauce","Great Value original barbecue sauce",5],
+  soy:["Soy sauce","Great Value soy sauce",6,1], brownSugar:["Brown sugar","Great Value light brown sugar",6,1],
+  riceVin:["Rice vinegar","rice vinegar",6,1], cornstarch:["Cornstarch","Great Value corn starch",6,1],
+  sesameOil:["Sesame oil","toasted sesame oil",6,1], honey:["Honey","Great Value honey",6,1],
+  oil:["Olive / vegetable oil","Great Value vegetable oil",6,1], spray:["Cooking spray","Great Value canola cooking spray",6,1],
+  butter:["Butter","Great Value salted butter",6,1], saltPepper:["Salt & black pepper","Great Value black pepper",6,1],
+  sage:["Dried sage","Great Value ground sage",6,1], garlicPowder:["Garlic powder","Great Value garlic powder",6,1],
+  onionPowder:["Onion powder","Great Value onion powder",6,1], smokedPaprika:["Smoked paprika","smoked paprika",6,1],
+  paprika:["Paprika","Great Value paprika",6,1], pepperFlakes:["Red pepper flakes","Great Value crushed red pepper",6,1],
+  chiliPowder:["Chili powder","Great Value chili powder",6,1], cumin:["Ground cumin","Great Value ground cumin",6,1],
+  oregano:["Dried oregano","Great Value oregano leaves",6,1], italian:["Italian seasoning","Great Value Italian seasoning",6,1],
+  dill:["Dried dill","dill weed",6,1], cinnamon:["Cinnamon","Great Value ground cinnamon",6,1],
+  garamMasala:["Garam masala","garam masala",6,1], cajun:["Cajun seasoning","Tony Chachere's Creole seasoning",6,1],
+  tacoSeas:["Taco seasoning packet","Great Value taco seasoning mix",6,1], fajitaSeas:["Fajita seasoning","fajita seasoning mix",6,1],
+  worcestershire:["Worcestershire sauce","Great Value Worcestershire sauce",6,1], mayo:["Mayo","Great Value mayonnaise",6,1],
+  ketchup:["Ketchup","Great Value ketchup",6,1], mustard:["Yellow mustard","Great Value yellow mustard",6,1],
+  pickles:["Pickle relish","Great Value sweet relish",6,1], bakingPowder:["Baking powder","Great Value baking powder",6,1],
+  chia:["Chia seeds","Great Value chia seeds",6,1], whey:["Whey protein (vanilla)","vanilla whey protein powder",6,1],
+  supplies:["Foil, parchment, gallon freezer bags","Great Value heavy duty aluminum foil",6,1]
+};
+
+const R = [
+{id:"b1",cat:"breakfast",name:"Turkey Sausage Breakfast Burritos",blurb:"Seasoned turkey, eggs, hash browns and cheddar rolled and frozen.",p:"39g",cost:26,time:"45 min",keeps:"Freezer 3 mo",tags:["Freezer","Stovetop"],
+ serve:"Makes 10. One burrito each per day.",
+ ings:[["turkey",2,"lb","2 lb ground turkey"],["sage",1,"tsp","1 tsp dried sage"],["garlicPowder",1,"tsp","1 tsp garlic powder"],["smokedPaprika",1,"tsp","1 tsp smoked paprika"],["pepperFlakes",.5,"tsp","1/2 tsp red pepper flakes"],["saltPepper",0,"","1 tsp salt + 1/2 tsp pepper, plus 1/2 tsp salt for eggs"],["eggs",18,"eggs","18 eggs"],["hashbrown",1,"lb","1 lb frozen diced hash browns"],["cheddar",8,"oz","8 oz shredded cheddar"],["tortilla",10,"ct","10 burrito-size flour tortillas"],["oil",1,"tbsp","1 tbsp oil"],["butter",1,"tbsp","1 tbsp butter"],["supplies",0,"","Foil + gallon freezer bags"]],
+ steps:["Set a 12-inch skillet over medium-high heat. Add the turkey and break it into small crumbles with a spatula.","Cook 8–10 minutes, stirring every minute or two, until no pink remains.","Add the sage, garlic powder, smoked paprika, red pepper flakes, 1 tsp salt and 1/2 tsp pepper. Stir 1 minute, then scoop into a large bowl.","Put the same skillet back on medium-high with 1 tbsp oil. Add the hash browns straight from the bag and spread flat.","Leave them alone 5 minutes so they brown. Flip in sections, cook 5 more minutes until golden, and add to the turkey bowl.","Whisk the eggs with 1/2 tsp salt until one even yellow.","Wipe out the skillet, set over medium-low with 1 tbsp butter. Pour in the eggs and wait 30 seconds.","Slowly push the eggs from the edges to the center for 3–4 minutes.","Pull the pan off the heat while the eggs still look slightly wet. They finish on reheat.","Add the eggs and cheddar to the bowl and stir.","Spread the filling on a sheet pan, divide into 10 piles, and cool 15 minutes. Warm filling makes soggy burritos.","Microwave the tortillas in stacks of 5 for 20 seconds so they fold without cracking.",["Build each burrito:",["Put one pile on the lower third of a tortilla.","Fold the left and right sides in.","Roll tightly from the bottom up."]],"Wrap each in foil and freeze in gallon bags."],
+ reheat:"Remove foil, wrap in a damp paper towel. Microwave 1.5 min, flip, then 1–1.5 min more."},
+{id:"b2",cat:"breakfast",name:"Sheet Pan Egg Bake",blurb:"Eggs, cottage cheese and canned chicken baked into 15 squares.",p:"50g",cost:24,time:"45 min",keeps:"Fridge 4 days",tags:["Oven","Eat cold"],
+ serve:"Makes 15 squares. You eat 2, Louise eats 1.",
+ ings:[["eggs",24,"eggs","24 eggs"],["cottage",16,"oz","16 oz cottage cheese"],["canCh",2,"cans","2 cans (12.5 oz) chicken breast"],["cheddar",8,"oz","8 oz shredded cheese"],["bellPepper",1,"ct","1 bell pepper"],["spinach",2,"oz","2 handfuls spinach (about 2 oz)"],["garlicPowder",1,"tsp","1 tsp garlic powder"],["saltPepper",0,"","1 tsp salt, 1/2 tsp pepper"],["spray",0,"","Cooking spray"]],
+ steps:["Heat the oven to 375°F. Spray a rimmed half sheet pan heavily, including the corners.","Dice the bell pepper small and roughly chop the spinach.","In a large bowl, whisk the eggs, cottage cheese, salt, garlic powder and pepper for 1 full minute.","Open the chicken cans and press the lids down to squeeze out the liquid. Break the meat into small shreds with a fork.","Stir the chicken, pepper, spinach and cheese into the eggs.","Pull the oven rack out, set the empty pan on it, and pour the mixture in there. Carrying a full pan spills it.","Bake 25–35 minutes, until the center doesn't jiggle and a knife in the middle comes out clean.","Cool 15 minutes, then cut 3 rows by 5 columns."],
+ reheat:"Eat cold, microwave 45 seconds, or fold a square into a tortilla."},
+{id:"b3",cat:"breakfast",name:"Protein Overnight Oats",blurb:"Oats, whey, Greek yogurt and berries in jars. No cooking.",p:"47g",cost:29,time:"15 min",keeps:"Fridge 5 days",tags:["No cook","Eat cold"],
+ serve:"Makes 10 jars. Yours get a full scoop of whey, Louise's get half. Counts as one of your shakes.",
+ ings:[["oats",5,"cups","5 cups old-fashioned oats (1/2 cup per jar)"],["whey",7.5,"scoops","7.5 scoops whey (1 per your jar, 1/2 per hers)"],["chia",10,"tbsp","10 tbsp chia seeds"],["yogurt",5,"cups","5 cups nonfat Greek yogurt"],["milk",6.67,"cups","6 2/3 cups milk (2/3 cup per jar)"],["berries",2.5,"cups","2 1/2 cups frozen berries"]],
+ steps:["Line up 10 jars (16 oz). Do each step across every jar before moving on.","Add 1/2 cup old-fashioned oats to each jar. Not instant or steel-cut.","Add 1 scoop whey to your jars, 1/2 scoop to Louise's.","Add 1 tbsp chia seeds.","Lid and shake. Mixing dry first stops the whey from clumping.","Add 1/2 cup Greek yogurt and 2/3 cup milk. Stir, scraping the bottom corners, until no dry powder is left.","Top with 1/4 cup frozen berries, lid, refrigerate."],
+ reheat:"Ready after 6 hours. Eat cold. Add a splash of milk if too thick."},
+{id:"b4",cat:"breakfast",name:"Freezer Breakfast Sandwiches",blurb:"Sheet-pan turkey sausage and egg on English muffins.",p:"58g",cost:25,time:"40 min",keeps:"Freezer 3 mo",tags:["Freezer","Oven"],
+ serve:"Makes 15. You eat 2, Louise eats 1.",
+ ings:[["eggs",18,"eggs","18 eggs"],["milk",.5,"cups","1/2 cup milk"],["turkey",2,"lb","2 lb ground turkey"],["sage",1,"tsp","1 tsp dried sage"],["garlicPowder",1,"tsp","1 tsp garlic powder"],["pepperFlakes",.5,"tsp","1/2 tsp red pepper flakes"],["saltPepper",0,"","1 tsp salt, 1/2 tsp pepper, plus 1/2 tsp salt for eggs"],["englishMuffin",15,"ct","15 English muffins"],["cheeseSlice",15,"slices","15 American cheese slices"],["spray",0,"","Cooking spray"],["supplies",0,"","Paper towels, foil or plastic wrap, gallon bags"]],
+ steps:["Heat the oven to 375°F. Spray 2 rimmed half sheet pans heavily.",["Egg sheet:",["Whisk the eggs, milk and 1/2 tsp salt.","Pull the oven rack out and set pan 1 on it.","Pour the eggs in there, then slide the rack in."]],["Turkey sheet:",["In a bowl, mix the turkey, sage, garlic powder, 1 tsp salt, pepper and pepper flakes with your hands.","Press it evenly across pan 2, all the way to the edges.","Put pan 2 in the oven."]],"Bake both 15–20 minutes. Eggs are done when the center doesn't jiggle; turkey at 165°F.","Cool 10 minutes, then cut each pan 3 rows by 5 columns.","Split and toast the English muffins. Toasting helps them hold up in the freezer.","Build each: bottom half, turkey, egg, cheese slice, top half.","Wrap each in a paper towel, then plastic wrap or foil. Freeze in gallon bags."],
+ reheat:"Remove foil, keep the paper towel. 50% power 1.5 min, flip, full power 45–60 seconds."},
+{id:"b5",cat:"breakfast",name:"Sheet Pan Protein Pancakes",blurb:"Blender batter with oats, cottage cheese and whey, baked and cut.",p:"48g",cost:20,time:"35 min",keeps:"Fridge 5 days",tags:["Oven","Blender","Eat cold"],
+ serve:"15 squares. You: 2 squares + 1 cup Greek yogurt. Louise: 1 square + 1/2 cup yogurt.",
+ ings:[["oats",2,"cups","2 cups old-fashioned oats"],["cottage",16,"oz","2 cups (16 oz) cottage cheese"],["eggs",8,"eggs","8 eggs"],["whey",3,"scoops","3 scoops vanilla whey"],["banana",2,"ct","2 ripe bananas"],["milk",1,"cups","1 cup milk"],["bakingPowder",1,"tbsp","1 tbsp baking powder"],["cinnamon",1,"tsp","1 tsp cinnamon + pinch of salt"],["blueberries",1,"cups","1 cup frozen blueberries"],["yogurt",7.5,"cups","7 1/2 cups Greek yogurt for the side cups"],["spray",0,"","Cooking spray + parchment"]],
+ steps:["Heat the oven to 350°F. Spray a rimmed half sheet pan, then line the bottom with parchment. The spray holds the parchment in place.","Add oats, cottage cheese, eggs, whey, bananas, milk, baking powder, cinnamon and salt to a blender.","Blend 1 minute until smooth. Do it in two halves if your blender struggles.","Pour into the pan and spread into the corners with a spatula.","Scatter the blueberries on top.","Bake 18–22 minutes, until the center springs back and a toothpick comes out clean.","Cool 15 minutes, then cut 3 rows by 5 columns.","Portion yogurt into side cups: 1 cup for you, 1/2 cup for Louise."],
+ reheat:"Eat cold or microwave 30 seconds. Peanut butter on top or a small cup of syrup."},
+
+{id:"m16",cat:"main",name:"Canned Chicken Salad Sandwiches",blurb:"Greek yogurt chicken salad with celery and pickles. No cooking.",p:"58g",cost:30,time:"20 min",keeps:"Fridge 5 days",tags:["No cook","Lunch","Cheap"],
+ serve:"You: about 1 1/4 cups filling on 2 sandwiches. Louise: about 3/4 cup on 1 sandwich. Filling and bread are packed separately.",
+ ings:[["canCh",6,"cans","6 cans (12.5 oz) chicken breast"],["yogurt",1.5,"cups","1 1/2 cups nonfat Greek yogurt"],["mayo",.5,"cup","1/2 cup mayo"],["mustard",2,"tbsp","2 tbsp mustard (yellow or Dijon)"],["lemon",1,"ct","1 lemon"],["celery",4,"ribs","4 celery ribs"],["redOnion",.5,"ct","1/2 red onion"],["pickles",.5,"cup","1/2 cup relish or chopped dill pickles"],["dill",1,"tsp","1 tsp dried dill"],["garlicPowder",1,"tsp","1 tsp garlic powder"],["saltPepper",0,"","1 tsp salt, 1/2 tsp pepper"],["bread",30,"slices","30 slices whole wheat bread (2 loaves)"],["lettuce",1,"bag","Lettuce leaves or shredded lettuce (optional)"]],
+ steps:["Open the chicken cans and press the lids down hard to squeeze out all the liquid. Wet chicken makes watery salad.","Dump the chicken into your largest bowl and break it into small shreds with a fork.","Dice the celery and red onion small, about the size of a pea.","Add the yogurt, mayo, mustard, juice of the lemon, relish, dill, garlic powder, salt and pepper to the bowl.","Add the celery and onion and stir until everything is evenly coated.","Taste it. Add more salt, lemon or mustard if it's flat.",["Portion the filling:",["Your 5 containers: about 1 1/4 cups each.","Louise's 5 containers: about 3/4 cup each.","A 1/4-cup measure makes this fast: 5 scoops for you, 3 for her."]],"Lid and refrigerate right away. Leave the bread in its bag.","Each morning, put 4 slices (yours) or 2 slices (hers) in a zip bag with the container. Build the sandwich at lunch so the bread doesn't go soggy."],
+ reheat:"No reheating. Keep it cold and eat Friday's portion last. Mayo and yogurt don't freeze well, so skip the freezer on this one."},
+{id:"m1",cat:"main",name:"Teriyaki Chicken & Broccoli",blurb:"Roasted thighs tossed in homemade teriyaki, over rice.",p:"49g",cost:22,time:"40 min",keeps:"Fridge 4 days",tags:["Sheet pan","Cheapest"],
+ ings:[["chThigh",4,"lb","4 lb boneless skinless chicken thighs"],["broccoli",3,"lb","3 lb broccoli (frozen is fine)"],["rice",4,"cups","4 cups dry rice"],["soy",.5,"cup","1/2 cup soy sauce"],["brownSugar",.33,"cup","1/3 cup brown sugar"],["riceVin",2,"tbsp","2 tbsp rice vinegar"],["garlic",4,"cloves","4 garlic cloves, minced"],["ginger",1,"tbsp","1 tbsp grated ginger (or 1 tsp ground)"],["cornstarch",1,"tbsp","1 tbsp cornstarch"],["oil",3,"tbsp","3 tbsp oil"],["garlicPowder",1,"tsp","1 tsp garlic powder"],["saltPepper",0,"","2 tsp salt, 1/2 tsp pepper"],["supplies",0,"","Foil"]],
+ steps:["Start 4 cups of rice (see Basics).","Heat the oven to 425°F. Line 2 sheet pans with foil and spray.","Pat the thighs dry with paper towels.","Toss thighs with 1 tbsp oil, 1 tsp salt, garlic powder and pepper. Spread in a single layer on pan 1.","On pan 2, toss the broccoli with 2 tbsp oil and 1 tsp salt. Frozen goes straight from the bag.",["Put both pans in:",["Broccoli out after 18–25 min, when the edges brown (frozen takes longer).","Chicken out after 20–25 min, at 175°F."]],["While they bake, make the sauce:",["In a small pot on medium, whisk soy, brown sugar, rice vinegar, garlic and ginger.","Bring to a boil.","In a cup, stir cornstarch into 1/4 cup cold water until smooth.","Pour it in while stirring.","Simmer 1–2 min until syrup-thick, then turn off the heat."]],"Rest the chicken 5 minutes and cut into bite-size strips.","Toss the strips in the sauce.","Portion rice, broccoli, chicken."]},
+{id:"m2",cat:"main",name:"Turkey Taco Bowls",blurb:"Seasoned turkey with black beans, corn and salsa over lime rice.",p:"54g",cost:26,time:"30 min",keeps:"Fridge 4 days",tags:["One pot","Fast"],
+ ings:[["turkey",4,"lb","4 lb 93% ground turkey"],["blackBeans",2,"cans","2 cans black beans"],["corn",2,"cups","2 cups frozen corn"],["rice",3,"cups","3 cups dry rice"],["salsa",1,"jars","1 jar (16 oz) salsa"],["lime",1,"ct","1 lime"],["yogurt",1.5,"cups","1 1/2 cups Greek yogurt (sour cream swap)"],["chiliPowder",2,"tbsp","2 tbsp chili powder"],["cumin",1,"tbsp","1 tbsp cumin"],["garlicPowder",2,"tsp","2 tsp garlic powder"],["onionPowder",1,"tsp","1 tsp onion powder"],["paprika",1,"tsp","1 tsp paprika"],["saltPepper",0,"","2 tsp salt"],["oil",1,"tbsp","1 tbsp oil"]],
+ steps:["Start 3 cups of rice.","Mix the seasoning in a small bowl: chili powder, cumin, garlic powder, onion powder, paprika, 1 1/2 tsp salt.","Heat 1 tbsp oil in a Dutch oven on medium-high. With only a 12-inch skillet, cook the turkey 2 lb at a time.","Add the turkey, break it up, cook 10–12 minutes until no pink.","Add the seasoning and stir 1 minute.","Add 1/2 cup water and half the salsa. Turn to medium-low and simmer 5 minutes, until most liquid is gone.","Drain and rinse the beans. Add them with the corn and cook 3–4 minutes until the corn is hot.","Stir the juice of the lime and 1/2 tsp salt into the finished rice.","Portion rice, turkey, then a spoonful of the remaining salsa.","Greek yogurt goes in a side cup. Add after reheating."]},
+{id:"m3",cat:"main",name:"Greek Chicken & Tzatziki",blurb:"Lemon-oregano chicken, roast potatoes and peppers, homemade tzatziki.",p:"53g",cost:30,time:"50 min",keeps:"Fridge 4 days",tags:["Sheet pan","Marinate"],
+ ings:[["chBreast",4,"lb","4 lb chicken breast"],["babyPot",3,"lb","3 lb baby potatoes"],["redOnion",2,"ct","2 red onions"],["bellPepper",2,"ct","2 bell peppers"],["lemon",3,"ct","3 lemons"],["garlic",5,"cloves","5 garlic cloves"],["oil",.5,"cup","1/3 cup olive oil + 2 tbsp"],["oregano",1,"tbsp","1 tbsp dried oregano"],["cucumber",1,"ct","1 cucumber"],["yogurt",2,"cups","2 cups nonfat Greek yogurt"],["dill",1,"tsp","1 tsp dried dill"],["saltPepper",0,"","3 tsp salt, 1/2 tsp pepper"]],
+ steps:["Whisk the marinade in a large bowl: 1/3 cup olive oil, juice of 2 lemons, 4 minced garlic cloves, oregano, 1 1/2 tsp salt, 1/2 tsp pepper.","Cut the chicken into 1.5-inch chunks, stir into the marinade, let sit 15 minutes (or overnight).","Heat the oven to 425°F.","Halve the potatoes, toss on pan 1 with 2 tbsp oil and 1 tsp salt. Roast 15 minutes.","Meanwhile cut the onions and peppers into 1-inch pieces.","Take the potatoes out and stir them.","Spread the chicken (let extra marinade drip off) and the onions and peppers on pan 2.","Roast both pans 18–22 minutes. Chicken at 165°F, potatoes fork-tender. Don't overshoot; breast dries out on reheat.",["Make the tzatziki:",["Grate the cucumber on the large holes of a box grater.","Wrap in a clean towel and squeeze hard over the sink.","Mix with the yogurt, 1 minced garlic clove, 1 tbsp lemon juice, dill and 1/2 tsp salt."]],"Pack tzatziki in side cups. Add after reheating."]},
+{id:"m4",cat:"main",name:"Ground Beef & Broccoli",blurb:"Takeout-style beef in a garlic-ginger soy sauce over rice.",p:"49g",cost:29,time:"30 min",keeps:"Fridge 4 days",tags:["One pot","Fast"],
+ ings:[["beef",4,"lb","4 lb 90/10 ground beef"],["broccoli",3,"lb","3 lb frozen broccoli"],["rice",4,"cups","4 cups dry rice"],["soy",.67,"cup","2/3 cup soy sauce"],["brownSugar",.25,"cup","1/4 cup brown sugar"],["sesameOil",2,"tbsp","2 tbsp sesame oil"],["garlic",6,"cloves","6 garlic cloves"],["ginger",1,"tbsp","1 tbsp grated ginger"],["cornstarch",2,"tbsp","2 tbsp cornstarch"],["pepperFlakes",.25,"tsp","Pinch of red pepper flakes"]],
+ steps:["Start 4 cups of rice.","Mix the sauce: soy, brown sugar, sesame oil, minced garlic, ginger, pepper flakes.","In a separate cup, whisk the cornstarch into 1/2 cup cold water.","Microwave the broccoli in a covered bowl 6–8 minutes, stirring halfway. Drain.","In a Dutch oven on medium-high, cook the beef 10–12 minutes, breaking it up, until no pink.","Tilt the pot and spoon the fat into an empty can. Not down the sink.","Pour in the sauce and let it bubble 1 minute.","Stir the cornstarch cup again (it settles) and pour it in while stirring.","Cook 1–2 minutes until the sauce thickens and coats the beef.","Add the broccoli and stir 1 minute."]},
+{id:"m5",cat:"main",name:"Salsa Shredded Chicken",blurb:"Chicken cooked in salsa and shredded. The lowest-effort recipe here.",p:"55g",cost:28,time:"15 min active",keeps:"Fridge 4 days",tags:["Slow cooker","Lowest effort"],
+ ings:[["chBreast",4,"lb","4 lb chicken breast"],["salsa",2,"jars","2 jars (16 oz) salsa"],["tacoSeas",1,"packet","1 packet taco seasoning"],["rice",3,"cups","3 cups dry rice"],["blackBeans",1,"cans","1 can beans"],["cheddar",4,"oz","4 oz shredded cheese"]],
+ steps:[["Cook the chicken, one method:",["Slow cooker: chicken in, taco seasoning on both sides, salsa over the top. Low 6 hours or high 3.5 hours.","Instant Pot: 1/2 cup water in first (avoids the burn warning), then chicken, seasoning, salsa. High pressure 12 min (thawed), natural release 10 min.","Oven: everything in a 9x13 dish, covered tightly with foil, 375°F for 35–40 min."]],"Move the chicken to a cutting board and pull apart with two forks.","Return it to the juices and stir so it soaks them up.","Cook 3 cups of rice.","Drain and rinse the beans and microwave 2 minutes.","Portion rice, beans, chicken with a spoonful of juice. Split the cheese across the top."]},
+{id:"m6",cat:"main",name:"Shrimp Fried Rice",blurb:"Two-batch fried rice with shrimp, egg and peas & carrots.",p:"48g",cost:38,time:"45 min",keeps:"Freezes well",tags:["Stovetop","Premium"],
+ ings:[["shrimp",3,"lb","3 lb frozen raw peeled shrimp"],["eggs",12,"eggs","12 eggs"],["rice",5,"cups","5 cups dry rice"],["peasCarrots",2,"lb","2 lb frozen peas & carrots"],["soy",.5,"cup","1/2 cup soy sauce"],["sesameOil",2,"tbsp","2 tbsp sesame oil"],["garlic",4,"cloves","4 garlic cloves"],["greenOnion",1,"bunch","1 bunch green onions"],["oil",5,"tbsp","About 5 tbsp oil"]],
+ steps:["First thing in the session: cook the rice, spread it on a sheet pan, refrigerate uncovered at least 1 hour. Warm rice turns to mush.","Thaw shrimp in a colander under cold running water 5–8 minutes. Pull off tails, pat dry.",["Prep before the stove goes on, it moves fast:",["Whisk the eggs.","Mince the garlic.","Slice the green onions.","Mix soy and sesame oil in a cup.","Open the peas & carrots.","Set out an empty bowl for cooked shrimp."]],"You'll cook everything in 2 rounds, half of each ingredient per round. A crowded pan steams instead of fries.",["Each round:",["1 tbsp oil in your largest skillet on high, about 1 minute until it shimmers.","Add 1.5 lb shrimp in one layer. 1.5 min, flip, 1 min more, until pink and C-shaped. Move to the bowl.","Medium heat, 1 tsp oil, pour in 6 eggs, stir gently 1–2 min until just set. Into the shrimp bowl.","High heat, 1 tbsp oil, half the garlic, stir 20 seconds.","Add half the rice and press flat. Leave 1 min, stir, repeat for 3–4 min until hot with some crispy grains.","Add 1 lb peas & carrots, stir 2 minutes.","Pour in half the soy mixture, stir 30 seconds.","Return the shrimp and eggs with half the green onions, stir 1 minute.","Empty into a large bowl and wipe the pan."]],"Do round two, then portion."]},
+{id:"m7",cat:"main",name:"Steak Fajita Bowls",blurb:"Seared sirloin, roasted peppers and onions, pinto beans and rice.",p:"45g",cost:37,time:"45 min",keeps:"Fridge 4 days",tags:["Cast iron","Premium"],
+ ings:[["sirloin",3,"lb","3 lb top sirloin"],["bellPepper",4,"ct","4 bell peppers"],["onion",2,"ct","2 onions"],["fajitaSeas",3,"tbsp","3 tbsp fajita seasoning (about 2 packets)"],["rice",3,"cups","3 cups dry rice"],["pintoBeans",2,"cans","2 cans pinto beans"],["salsa",1,"jars","1 jar salsa"],["yogurt",1.5,"cups","1 1/2 cups Greek yogurt"],["cumin",.5,"tsp","Cumin + salt for beans"],["oil",3,"tbsp","2 tbsp oil + 1 tbsp vegetable/avocado oil"]],
+ steps:["Take the steak out of the fridge 30 minutes before cooking.","Pat dry and season both sides with 2 tbsp fajita seasoning and 1 tsp salt.","Start 3 cups of rice.","Heat the oven to 425°F.","Slice peppers and onions into 1/4-inch strips. Toss on a sheet pan with 2 tbsp oil and 1 tbsp fajita seasoning.","Roast 20–25 minutes, stirring once.","Turn on the fan. Heat cast iron on high 3–4 minutes, until a drop of water sizzles instantly.","Add 1 tbsp vegetable or avocado oil (not olive oil at this heat).","Add one or two pieces of steak. Don't touch them 3–4 minutes.","Flip and cook 3 more minutes to 130°F. Over 1 inch thick: add a minute per side.","Repeat with the rest.","Rest 10 minutes on a cutting board.","Find the lines running along the meat (the grain) and slice across them into 1/4-inch strips.","Drain and rinse the beans, microwave 2 minutes, season with salt and cumin.","Portion rice, beans, peppers and onions, steak. Salsa and yogurt in side cups."]},
+{id:"m8",cat:"main",name:"Turkey Meatballs Marinara",blurb:"Baked turkey meatballs simmered in marinara over pasta.",p:"57g",cost:31,time:"45 min",keeps:"Fridge 4 days",tags:["Oven","Freezer"],
+ serve:"About 60 meatballs. 7 per your container, 5 per Louise's.",
+ ings:[["turkey",4,"lb","4 lb ground turkey"],["eggs",2,"eggs","2 eggs"],["breadcrumbs",1,"cups","1 cup breadcrumbs"],["parm",.5,"cups","1/2 cup grated parmesan"],["garlicPowder",2,"tsp","2 tsp garlic powder"],["italian",2,"tsp","2 tsp Italian seasoning"],["saltPepper",0,"","1 1/2 tsp salt, 1/2 tsp pepper, 1 tbsp salt for pasta water"],["pasta",1.5,"lb","1.5 lb pasta"],["marinara",2,"jars","2 jars (24 oz) marinara"],["oil",1,"tbsp","1 tbsp olive oil"],["spray",0,"","Foil + cooking spray"]],
+ steps:["Heat the oven to 400°F. Line 2 sheet pans with foil and spray.","Put the turkey, eggs, breadcrumbs, parmesan, garlic powder, Italian seasoning, salt and pepper in a large bowl. Mix with your hands only until even. Overmixing makes them tough.","Wet your hands and roll golf-ball-size meatballs (about 2 tbsp). A cookie scoop is faster.","Bake 18–20 minutes, to 165°F.",["Meanwhile, the pasta:",["Bring a large pot of water with 1 tbsp salt to a boil.","Cook the pasta 2 minutes less than the box says.","Drain and toss with 1 tbsp olive oil."]],"Pour the marinara into the empty pasta pot on medium.","Add the meatballs, stir gently, simmer 5 minutes.","Portion pasta, then meatballs and sauce."]},
+{id:"m9",cat:"main",name:"BBQ Chicken & Sweet Potatoes",blurb:"Glazed thighs, roasted sweet potatoes, buttered green beans.",p:"53g",cost:27,time:"45 min",keeps:"Fridge 4 days",tags:["Sheet pan","Cheap"],
+ ings:[["chThigh",5,"lb","5 lb boneless skinless chicken thighs"],["sweetPot",3,"lb","3 lb sweet potatoes"],["greenBeans",2,"lb","2 lb frozen green beans"],["bbq",1,"cup","1 cup BBQ sauce"],["smokedPaprika",2,"tsp","2 tsp smoked paprika"],["garlicPowder",1.5,"tsp","1 1/2 tsp garlic powder"],["saltPepper",0,"","3 tsp salt, 1 tsp pepper"],["butter",1,"tbsp","1 tbsp butter"],["oil",2,"tbsp","2 tbsp oil"],["supplies",0,"","Foil"]],
+ steps:["Heat the oven to 425°F. Line 2 sheet pans with foil.",["Sweet potatoes:",["Peel and cut into 1-inch cubes.","Toss on pan 1 with 2 tbsp oil, 1 tsp salt, 1 tsp smoked paprika.","Into the oven."]],["Chicken:",["Pat the thighs dry.","Season both sides with 1 1/2 tsp salt, 1 tsp pepper, 1 tsp garlic powder, 1 tsp smoked paprika.","Lay flat on pan 2 and into the oven."]],"At 15 minutes, pull the sweet potatoes and flip them.","Also at 15 minutes, pull the chicken and brush the tops with BBQ sauce.","Both back in 10–15 minutes. Chicken at 175°F; potatoes browned and fork-tender.",["Green beans:",["Microwave in a covered bowl 8–10 minutes, stirring halfway.","Drain, toss with butter, 1/2 tsp salt, 1/2 tsp garlic powder."]],"Slice the chicken and portion."]},
+{id:"m10",cat:"main",name:"Burger Bowls",blurb:"Seasoned beef, crispy potatoes, cheddar and burger sauce.",p:"48g",cost:32,time:"40 min",keeps:"Fridge 4 days",tags:["Oven","Stovetop"],
+ ings:[["beef",4,"lb","4 lb 90/10 ground beef"],["russet",3,"lb","3 lb russet or Yukon potatoes"],["onion",1,"ct","1 onion"],["worcestershire",2,"tbsp","2 tbsp Worcestershire"],["garlicPowder",3,"tsp","3 tsp garlic powder (plus 1/2 tsp for sauce)"],["onionPowder",1,"tsp","1 tsp onion powder"],["saltPepper",0,"","3 tsp salt, 1 tsp pepper"],["cheddar",8,"oz","8 oz shredded cheddar"],["mayo",.5,"cup","1/2 cup mayo"],["ketchup",3,"tbsp","3 tbsp ketchup"],["pickles",2,"tbsp","2 tbsp relish or chopped pickles"],["mustard",1,"tsp","1 tsp mustard"],["lettuce",1,"bag","Shredded lettuce (optional)"],["oil",2,"tbsp","2 tbsp oil"]],
+ steps:["Heat the oven to 425°F.",["Potatoes:",["Cut into 3/4-inch cubes.","Toss on a sheet pan with 2 tbsp oil, 1 tsp salt, 1 tsp garlic powder.","Roast 30–35 minutes, flipping at 15, until crisp."]],["Beef:",["Dice the onion.","In a Dutch oven on medium-high, cook onion and beef 10–12 minutes, breaking up the beef, until no pink.","Spoon the fat into a can."]],"Stir in 2 tsp salt, 2 tsp garlic powder, onion powder, pepper and Worcestershire. Cook 2 minutes.","Burger sauce: mix mayo, ketchup, relish, mustard and 1/2 tsp garlic powder.","Portion potatoes, then beef. Split the cheddar across the top; it melts on reheat.","Sauce, pickles and lettuce in side cups. Add after reheating."]},
+{id:"m11",cat:"main",name:"Butter Chicken",blurb:"Thighs simmered in spiced tomato sauce finished with yogurt and butter.",p:"50g",cost:30,time:"45 min",keeps:"Fridge 4 days",tags:["One pot","Freezer"],
+ ings:[["chThigh",4,"lb","4 lb boneless chicken thighs"],["rice",4,"cups","4 cups dry rice"],["onion",1,"ct","1 onion"],["garlic",6,"cloves","6 garlic cloves"],["ginger",1,"tbsp","1 tbsp grated ginger"],["garamMasala",3,"tbsp","3 tbsp garam masala (one-time $4 buy)"],["cumin",1,"tsp","1 tsp cumin"],["paprika",1,"tsp","1 tsp paprika"],["crushedTom",1,"cans","1 can (28 oz) crushed tomatoes"],["yogurt",1,"cups","1 cup Greek yogurt"],["peas",1,"lb","1 lb frozen peas"],["butter",3,"tbsp","3 tbsp butter"],["oil",1,"tbsp","1 tbsp oil"],["saltPepper",0,"","2 tsp salt"]],
+ steps:["Start 4 cups of rice.","Cut the thighs into 1-inch pieces.",["Start the sauce:",["Dutch oven on medium, melt 1 tbsp butter with 1 tbsp oil.","Add the diced onion, cook 5–6 minutes until soft.","Add garlic and ginger, stir 1 minute."]],"Add garam masala, cumin and paprika. Stir constantly 30 seconds; spices burn fast.","Add the crushed tomatoes and 2 tsp salt. Simmer 5 minutes.",["Cook the chicken:",["Add the raw chicken, stir, bring back to a bubble.","Turn to medium-low and cover.","Simmer 20 minutes, stirring twice, to 175°F."]],["Finish:",["Turn off the heat, wait 2 minutes.","In a bowl, mix one ladle of hot sauce into the yogurt. Warming it first stops curdling.","Stir the yogurt back into the pot.","Stir in the peas and 2 tbsp butter, cover 3 minutes."]],"Serve over rice."]},
+{id:"m12",cat:"main",name:"Honey Garlic Shrimp",blurb:"Sticky honey-soy shrimp with edamame and rice.",p:"43g",cost:37,time:"30 min",keeps:"Fridge 4 days",tags:["Stovetop","Premium","Fast"],
+ ings:[["shrimp",3,"lb","3 lb frozen shrimp"],["rice",4,"cups","4 cups dry rice"],["honey",.5,"cup","1/2 cup honey"],["soy",.33,"cup","1/3 cup soy sauce"],["garlic",6,"cloves","6 garlic cloves"],["riceVin",1,"tbsp","1 tbsp rice vinegar"],["pepperFlakes",1,"tsp","1 tsp red pepper flakes"],["cornstarch",1,"tbsp","1 tbsp cornstarch"],["edamame",1.5,"lb","1.5 lb frozen shelled edamame"],["oil",2,"tbsp","2 tbsp oil"]],
+ steps:["Start 4 cups of rice.","Thaw shrimp under cold running water in a colander 5–8 minutes. Pull off tails, pat dry.","Mix sauce in a cup: honey, soy, minced garlic, rice vinegar, pepper flakes. In a separate small cup, stir the cornstarch into 2 tbsp cold water.",["Cook the shrimp in two batches:",["1 tbsp oil in a 12-inch skillet on medium-high.","Add 1.5 lb shrimp in one layer. 1.5 min, flip, 1 min, until just pink.","Move to a bowl. Repeat.","Pull them slightly early; overcooked shrimp turns rubbery on reheat."]],["Thicken the sauce:",["Medium heat, pour the honey sauce into the skillet, bubble 2 minutes.","Stir the cornstarch cup and pour in.","Stir 1 minute until thick.","Heat off, add the shrimp back, toss."]],"Microwave the edamame covered 5–6 minutes and salt it.","Portion rice, edamame, shrimp."],
+ reheat:"50% power for 2 minutes keeps the shrimp tender."},
+{id:"m13",cat:"main",name:"Beef & Bean Chili",blurb:"Three-bean beef chili with cheddar. Freezes better than anything here.",p:"55g",cost:35,time:"60 min",keeps:"Freezer 3 mo",tags:["One pot","Freezer"],
+ ings:[["beef",4,"lb","4 lb 90/10 ground beef (or turkey)"],["onion",1,"ct","1 onion"],["bellPepper",2,"ct","2 bell peppers"],["garlic",4,"cloves","4 garlic cloves"],["chiliPowder",4,"tbsp","1/4 cup chili powder"],["cumin",2,"tbsp","2 tbsp cumin"],["smokedPaprika",1,"tbsp","1 tbsp smoked paprika"],["oregano",1,"tsp","1 tsp oregano"],["saltPepper",0,"","2 tsp salt, more to taste"],["beansMix",3,"cans","3 cans beans (kidney, black, pinto)"],["crushedTom",1,"cans","1 can (28 oz) crushed tomatoes"],["tomSauce",1,"cans","1 can (15 oz) tomato sauce"],["cheddar",8,"oz","8 oz shredded cheddar"],["oil",1,"tbsp","1 tbsp oil"]],
+ steps:["Dice the onion and peppers. Mince the garlic.","Dutch oven on medium-high with 1 tbsp oil. Cook onion and peppers 5 minutes until soft.","Add the beef, break it up, cook 10–12 minutes until no pink. Spoon out the fat.","Add garlic, chili powder, cumin, smoked paprika, oregano, 2 tsp salt. Stir 1 minute.","Drain and rinse the beans. Add with the crushed tomatoes, tomato sauce and 1 cup water.",["Simmer:",["Bring to a boil.","Turn to low, lid slightly cracked.","Simmer 30–45 minutes, stirring and scraping the bottom every 10 minutes."]],"Taste and add salt if flat.","Portion 3 ladles for you, 2 for Louise. Split the cheddar on top. Add rice if you want more carbs."]},
+{id:"m14",cat:"main",name:"Creamy Cajun Chicken Pasta",blurb:"Cajun chicken in a parmesan cream cheese sauce with spinach.",p:"58g",cost:30,time:"40 min",keeps:"Fridge 4 days",tags:["One pot","Highest protein"],
+ ings:[["chBreast",4,"lb","4 lb chicken breast"],["cajun",4,"tbsp","4 tbsp Cajun seasoning"],["pasta",1,"lb","1 lb pasta"],["oil",2,"tbsp","2 tbsp oil"],["butter",1,"tbsp","1 tbsp butter"],["garlic",4,"cloves","4 garlic cloves"],["milk",2,"cups","2 cups milk"],["creamCheese",8,"oz","8 oz cream cheese"],["parm",1,"cups","1 cup grated parmesan"],["spinach",5,"oz","5 oz bag spinach"]],
+ steps:["Cut the chicken into 1-inch pieces and toss with 3 tbsp Cajun seasoning. Most blends are salty, so no salt yet.",["Pasta:",["Bring a large pot of salted water to a boil.","Cook 2 minutes less than the box says.","Scoop out 1 cup of pasta water before draining.","Drain."]],["Chicken, in two batches:",["1 tbsp oil in a Dutch oven on medium-high.","Half the chicken in one layer, 6–8 minutes, to 165°F.","Into a bowl. Repeat."]],["Sauce:",["Medium heat, add butter and minced garlic, stir 30 seconds.","Add milk and cubed cream cheese. Whisk 3–4 minutes until smooth.","Whisk in parmesan and 1 more tbsp Cajun seasoning.","Add spinach a handful at a time until each wilts."]],"Add the pasta and chicken back and toss. Too thick? Add pasta water a splash at a time.","Taste and salt if needed."],
+ reheat:"The sauce tightens in the fridge. Add a splash of milk before reheating."},
+{id:"m15",cat:"main",name:"Garlic Butter Steak Bites",blurb:"Seared sirloin cubes in garlic butter with potatoes and green beans.",p:"45g",cost:38,time:"45 min",keeps:"Fridge 4 days",tags:["Cast iron","Premium"],
+ ings:[["sirloin",3.5,"lb","3.5 lb top sirloin"],["babyPot",3,"lb","3 lb baby potatoes"],["greenBeans",2,"lb","2 lb frozen green beans"],["butter",3,"tbsp","3 tbsp butter"],["garlic",6,"cloves","6 garlic cloves"],["oil",6,"tbsp","3 tbsp oil + 3 tbsp vegetable oil for searing"],["saltPepper",0,"","3 tsp salt, 1 tsp pepper"]],
+ steps:["Heat the oven to 425°F.","Halve the potatoes, toss with 2 tbsp oil and 1 tsp salt on a sheet pan. Roast 30–35 minutes, stirring halfway.","Toss the green beans with 1 tbsp oil and 1/2 tsp salt on a second pan. Roast 20 minutes alongside.","Pat the steak dry, cut into 1-inch cubes, trim large fat chunks. Season with 1 1/2 tsp salt and 1 tsp pepper.","Turn on the fan. Heat cast iron on high 3–4 minutes until a water drop sizzles instantly.",["Sear in 3 batches:",["1 tbsp vegetable oil.","1/3 of the steak in one layer. Crowding steams it gray.","Don't touch it for 2 minutes.","Flip, cook 1 minute more.","Into a bowl. Repeat twice.","Pink in the middle is right; it cooks more on reheat."]],["Garlic butter:",["After the last batch, turn to low.","Add butter and minced garlic, stir 30 seconds without browning.","Pour over the steak and toss."]],"Portion potatoes, green beans, steak."]}
+];
+
+// per unit: [kcal, protein, carbs, fat, baseUnit]
+const NUT = {
+ turkey:[680,88,0,34,"lb"], chThigh:[635,86,0,32,"lb"], chBreast:[545,102,0,12,"lb"], canCh:[270,55,0,5,"cans"],
+ beef:[800,92,0,44,"lb"], sirloin:[680,100,0,27,"lb"], shrimp:[385,91,0,2,"lb"],
+ eggs:[72,6.3,.4,4.8,"eggs"], cheddar:[115,7,.4,9.5,"oz"], cheeseSlice:[70,3.5,1.5,5.5,"slices"], cottage:[22.5,3,1.25,.6,"oz"],
+ yogurt:[130,23,9,0,"cups"], milk:[122,8,12,5,"cups"], parm:[336,30,3,22,"cups"], creamCheese:[100,2,1.5,10,"oz"],
+ bellPepper:[31,1,7,.3,"ct"], onion:[44,1.2,10,0,"ct"], redOnion:[44,1.2,10,0,"ct"], spinach:[6.5,.8,1,.1,"oz"],
+ babyPot:[350,9,77,.5,"lb"], russet:[358,9.5,82,.4,"lb"], sweetPot:[390,7,91,.2,"lb"], garlic:[4,.2,1,0,"cloves"], ginger:[5,0,1,0,"tbsp"],
+ lemon:[17,.6,5,0,"ct"], lime:[20,.5,7,0,"ct"], cucumber:[30,1,7,0,"ct"], banana:[105,1.3,27,.4,"ct"], greenOnion:[32,1.8,7,0,"bunch"],
+ celery:[6,.3,1.2,0,"ribs"], hashbrown:[378,11,81,0,"lb"], broccoli:[127,13.5,24,1.4,"lb"], corn:[120,4,27,1,"cups"],
+ peasCarrots:[240,15,45,2,"lb"], peas:[350,24,62,2,"lb"], greenBeans:[150,8,32,1,"lb"], edamame:[550,54,40,23,"lb"],
+ berries:[70,1,17,.5,"cups"], blueberries:[80,1,19,1,"cups"], rice:[675,13,148,1.2,"cups"], tortilla:[210,6,35,5,"ct"],
+ oats:[300,10,54,5,"cups"], englishMuffin:[120,4,25,1,"ct"], pasta:[1680,59,340,7,"lb"], breadcrumbs:[427,14,78,6,"cups"],
+ bread:[70,3.5,12,1,"slices"], blackBeans:[385,25,70,2,"cans"], pintoBeans:[385,25,70,2,"cans"], beansMix:[385,25,70,2,"cans"],
+ salsa:[150,4,30,0,"jars"], marinara:[385,11,55,14,"jars"], crushedTom:[260,13,58,2,"cans"], tomSauce:[105,5,23,1,"cans"],
+ bbq:[35,0,8.5,0,"tbsp"], soy:[10,1,1,0,"tbsp"], brownSugar:[52,0,13.4,0,"tbsp"], cornstarch:[30,0,7,0,"tbsp"],
+ sesameOil:[120,0,0,14,"tbsp"], honey:[64,0,17.5,0,"tbsp"], oil:[120,0,0,14,"tbsp"], butter:[100,0,0,11.5,"tbsp"],
+ mayo:[90,0,0,10,"tbsp"], ketchup:[20,0,5,0,"tbsp"], mustard:[10,.6,1,.5,"tbsp"], pickles:[20,0,5,0,"tbsp"],
+ whey:[120,24,3,1.5,"scoops"], chia:[60,2,5,4,"tbsp"], tacoSeas:[90,0,15,0,"packet"], fajitaSeas:[20,0,4,0,"tbsp"]
+};
+const UCONV = {tsp:1/3,tbsp:1,cup:16,cups:16};
+const MEAT = new Set(["turkey","chThigh","chBreast","canCh","beef","sirloin","shrimp"]);
+// share of the batch in one container: who = "you" | "her"
+function share(r,k,who){
+  const Y = who==="you";
+  switch(r.id){
+    case "b1": return .1;
+    case "b2": case "b4": return Y?2/15:1/15;
+    case "b3": return k==="whey" ? (Y?1:.5)/7.5 : .1;
+    case "b5": return k==="yogurt" ? (Y?1:.5)/7.5 : (Y?2/15:1/15);
+    case "m6": case "m13": case "m14": return Y?.12:.08;
+    case "m8": return k==="pasta" ? .1 : (Y?7/60:5/60);
+    case "m16": return k==="bread" ? (Y?4:2)/30 : (Y?5/40:3/40);
+  }
+  if(MEAT.has(k) || (C[k] && C[k][3])) return Y?.12:.08;
+  return .1;
+}
+function macros(r,who){
+  const t=[0,0,0,0];
+  r.ings.forEach(([k,q,u])=>{
+    const n=NUT[k]; if(!n||!q) return;
+    let qty=q;
+    if(n[4]!==u){ if(n[4]==="tbsp"&&UCONV[u]) qty=q*UCONV[u]; else return; }
+    const s=share(r,k,who);
+    for(let i=0;i<4;i++) t[i]+=n[i]*qty*s;
+  });
+  return t.map(Math.round);
+}
+
+const PRESETS = [["Week 1",["b1","m1","m2"]],["Week 2",["b2","m3","m4"]],["Week 3",["b3","m5","m6"]],["Week 4",["b1","m2","m7"]],["Week 5",["b4","m9","m13"]],["Week 6",["b5","m8","m11"]],["Week 7",["b4","m10","m12"]],["Week 8",["b5","m14","m15"]]];
+
+const GEAR = [
+ ["Instant-read thermometer","Ends the guessing on chicken and steak. The single best $15 here.","instant read meat thermometer"],
+ ["Meal prep containers (glass or BPA-free)","You need about 30. Two-compartment ones keep sauce off the rice.","meal prep containers 2 compartment"],
+ ["Rimmed half sheet pans (x2)","Most recipes use two at once.","half sheet pan 2 pack"],
+ ["Rice cooker","Takes rice off the stove entirely. 10-cup size handles 4 cups dry.","Hamilton Beach rice cooker"],
+ ["Small sauce cups with lids","For yogurt, tzatziki, salsa and burger sauce.","2 oz sauce cups with lids"],
+ ["Masking tape + Sharpie","Label each container with the day. Stops the Friday-container-on-Monday problem.","masking tape"]
+];
+
+// state
+let week = new Set(), got = new Set(), filter = "all";
+try{ const s = JSON.parse(localStorage.getItem("prep-week")||"[]"); s.forEach(x=>week.add(x)); }catch(e){}
+try{ const g = JSON.parse(localStorage.getItem("prep-got")||"[]"); g.forEach(x=>got.add(x)); }catch(e){}
+const save = () => { try{ localStorage.setItem("prep-week",JSON.stringify([...week])); localStorage.setItem("prep-got",JSON.stringify([...got])); }catch(e){} };
+const byId = id => R.find(r=>r.id===id);
+const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]));
+const fmt = n => { const r = Math.round(n*100)/100; return (r%1===0? r : r.toFixed(2).replace(/0+$/,"")).toString(); };
+
+function stats(r){ const [k,P,Cb,F]=macros(r,"you"); return `<div class="stat"><span class="k">Protein</span><span class="v">${P}g</span></div><div class="stat"><span class="k">Carbs</span><span class="v">${Cb}g</span></div><div class="stat"><span class="k">Fat</span><span class="v">${F}g</span></div><div class="stat"><span class="k">Cal</span><span class="v">${k}</span></div>`; }
+function meta(r){ return `<span class="meta num">~$${r.cost} · ${esc(r.time)} · your container</span>`; }
+function macroTable(r){ const row=(lbl,m)=>`<tr><th scope="row">${lbl}</th><td>${m[1]}g</td><td>${m[2]}g</td><td>${m[3]}g</td><td>${m[0]}</td></tr>`; return `<div class="mt"><table><thead><tr><th></th><th>Protein</th><th>Carbs</th><th>Fat</th><th>Calories</th></tr></thead><tbody>${row("You",macros(r,"you"))}${row("Louise",macros(r,"her"))}</tbody></table></div><p class="hint" style="margin:6px 0 0">Per container (breakfast: per day\u2019s portion). Estimates from standard nutrition labels.</p>`; }
+
+function renderCards(){
+  ["breakfast","main"].forEach(cat=>{
+    const g = document.getElementById("grid-"+cat);
+    g.innerHTML = R.filter(r=>r.cat===cat).map(r=>`
+      <article class="card${week.has(r.id)?" inweek":""}" data-id="${r.id}">
+        <button class="open" data-open="${r.id}" aria-label="Open ${esc(r.name)}">
+          <span class="tape">${esc(r.name)}</span>
+          <span class="stats">${stats(r)}</span>${meta(r)}
+          <span class="blurb">${esc(r.blurb)}</span>
+          <span class="tags"><span class="tag five">5 days × 2</span>${[r.keeps,...r.tags].map(t=>`<span class="tag">${esc(t)}</span>`).join("")}</span>
+        </button>
+        <div class="cardfoot">
+          <button data-open="${r.id}">Open recipe</button>
+          <button class="add" data-add="${r.id}" aria-pressed="${week.has(r.id)}">${week.has(r.id)?"✓ In week":"+ Week"}</button>
+        </div>
+      </article>`).join("");
+  });
+  document.getElementById("sec-breakfast").hidden = filter==="main";
+  document.getElementById("sec-main").hidden = filter==="breakfast";
+}
+
+function stepHTML(s){
+  if(Array.isArray(s)) return `<li><div class="st">${esc(s[0])}<ol>${s[1].map(x=>`<li>${esc(x)}</li>`).join("")}</ol></div></li>`;
+  return `<li><div class="st">${esc(s)}</div></li>`;
+}
+
+const dlg = document.getElementById("dlg");
+let current = null;
+function openRecipe(id){
+  const r = byId(id); current = id;
+  document.getElementById("dlgTitle").textContent = r.name;
+  document.getElementById("dlgStats").innerHTML = stats(r);
+  document.getElementById("dlgTags").innerHTML = '<span class="tag five">5 days × 2</span>' + [r.keeps,...r.tags].map(t=>`<span class="tag">${esc(t)}</span>`).join("");
+  const serve = "5 days for both of you. " + (r.serve || "10 containers: 5 yours, 5 Louise's with about 2/3 the meat.");
+  document.getElementById("dlgBody").innerHTML = `
+    <div class="serve">${esc(serve)}</div>
+    <div><h3>Macros</h3>${macroTable(r)}</div>
+    <div><h3>Ingredients</h3><ul class="ings">${r.ings.map(([k,,,t])=>{const c=C[k];return `<li><span>${esc(t)}${c[3]?' <span class="pantrytag">· pantry</span>':""}</span><a class="wm" href="${WM(c[1])}" target="_blank" rel="noopener">Walmart ↗</a></li>`}).join("")}</ul></div>
+    <div><h3>Steps</h3><ol class="steps">${r.steps.map(stepHTML).join("")}</ol></div>
+    ${r.reheat?`<div class="note"><b>Reheat:</b> ${esc(r.reheat)}</div>`:""}`;
+  syncDlgAdd();
+  dlg.showModal();
+  document.getElementById("dlgBody").scrollTop = 0;
+}
+function syncDlgAdd(){ const b=document.getElementById("dlgAdd"); const on=week.has(current); b.setAttribute("aria-pressed",on); b.textContent = on?"✓ In this week":"+ Add to this week"; }
+
+function toggle(id){ week.has(id)?week.delete(id):week.add(id); save(); renderCards(); renderWeek(); if(dlg.open) syncDlgAdd(); }
+
+function buildList(){
+  const items = new Map(), pantry = new Map();
+  [...week].map(byId).forEach(r=>{
+    r.ings.forEach(([k,q,u])=>{
+      const c=C[k];
+      if(c[3]){ if(!pantry.has(k)) pantry.set(k,new Set()); pantry.get(k).add(r.name); return; }
+      const key=k+"|"+u;
+      if(!items.has(key)) items.set(key,{k,u,q:0,rs:new Set()});
+      const it=items.get(key); it.q+=q; it.rs.add(r.name);
+    });
+  });
+  const groups = AISLES.map(()=>[]);
+  items.forEach((it,key)=>groups[C[it.k][2]].push({key,label:C[it.k][0],qty:fmt(it.q)+" "+it.u,rs:[...it.rs],k:it.k}));
+  pantry.forEach((rs,k)=>groups[6].push({key:k,label:C[k][0],qty:"",rs:[...rs],k}));
+  groups.forEach(g=>g.sort((a,b)=>a.label.localeCompare(b.label)));
+  return groups;
+}
+
+function renderWeek(){
+  const sel=[...week].map(byId).sort((a,b)=>a.id.localeCompare(b.id));
+  document.getElementById("weekJump").textContent = "This week · "+sel.length;
+  document.getElementById("selEmpty").hidden = sel.length>0;
+  document.getElementById("selList").innerHTML = sel.map(r=>`<li><span>${esc(r.name)} <span class="num" style="color:var(--muted)">~$${r.cost}</span></span><button data-add="${r.id}" aria-label="Remove ${esc(r.name)}">×</button></li>`).join("");
+  const total = sel.reduce((s,r)=>s+r.cost,0);
+  document.getElementById("total").textContent = "$"+total;
+  document.getElementById("meterFill").style.width = Math.min(100,total/150*100)+"%";
+  document.getElementById("meterFill").style.background = total>120?"var(--warn)":"var(--accent)";
+  const b=sel.filter(r=>r.cat==="breakfast").length, m=sel.filter(r=>r.cat==="main").length, prem=sel.filter(r=>r.cost>=37).length;
+  let msg="";
+  if(sel.length){
+    if(prem>1) msg=`<div class="msg warn">Two premium proteins (shrimp or steak) in one week. Swap one for a chicken, turkey or beef recipe to stay on budget.</div>`;
+    else if(total>120) msg=`<div class="msg warn">About $${total-120} over the $120 target.</div>`;
+    else if(b===1&&m===2) msg=`<div class="msg ok">Full week: 30 containers, about $${120-total} under the top of your budget for milk.</div>`;
+    else msg=`<div class="msg ok">${b} breakfast, ${m} mains picked. A full week is 1 breakfast + 2 mains.</div>`;
+  }
+  document.getElementById("weekMsg").innerHTML=msg;
+
+  const groups=buildList(), shop=document.getElementById("shop");
+  if(!sel.length){ shop.innerHTML='<p class="empty">Your combined list shows up here once you pick recipes.</p>'; return; }
+  shop.innerHTML = groups.map((g,i)=>g.length?`<h4>${AISLES[i]}</h4><ul>${g.map(it=>`
+    <li class="${got.has(it.key)?"got":""}"><input type="checkbox" id="g-${esc(it.key)}" data-got="${esc(it.key)}" ${got.has(it.key)?"checked":""}>
+    <label for="g-${esc(it.key)}"><span class="nm">${esc(it.label)}</span>${it.qty?`<span class="qty">${esc(it.qty)}</span>`:""}<span class="for">${esc(it.rs.join(" · "))}</span></label>
+    <a class="wm" href="${WM(C[it.k][1])}" target="_blank" rel="noopener">Walmart ↗</a></li>`).join("")}</ul>`:"").join("");
+}
+
+function listText(){
+  const groups=buildList(); let out="Walmart list\n";
+  groups.forEach((g,i)=>{ if(!g.length) return; out+="\n"+AISLES[i]+"\n"; g.forEach(it=>{ out+=`- ${it.label}${it.qty?" ("+it.qty+")":""}\n`; }); });
+  return out;
+}
+
+document.getElementById("presets").innerHTML = PRESETS.map(([n,ids],i)=>{const rs=ids.map(byId);return `<button class="preset" data-preset="${i}"><b>${n}</b><span>${rs.map(r=>esc(r.name)).join(", ")}</span><span class="num">~$${rs.reduce((s,r)=>s+r.cost,0)}</span></button>`}).join("");
+document.getElementById("gearGrid").innerHTML = GEAR.map(([n,d,q])=>`<div class="panel"><b>${esc(n)}</b><p>${esc(d)}</p><a class="wm" href="${WM(q)}" target="_blank" rel="noopener">Walmart ↗</a></div>`).join("");
+
+document.addEventListener("click",e=>{
+  const t=e.target.closest("[data-open],[data-add],[data-preset],.chip,[data-got]");
+  if(!t) return;
+  if(t.dataset.open){ openRecipe(t.dataset.open); }
+  else if(t.dataset.add){ toggle(t.dataset.add); }
+  else if(t.dataset.preset){ week=new Set(PRESETS[+t.dataset.preset][1]); got.clear(); save(); renderCards(); renderWeek(); }
+  else if(t.classList.contains("chip")){ filter=t.dataset.f; document.querySelectorAll(".chip").forEach(c=>c.setAttribute("aria-pressed",c===t)); renderCards(); }
+});
+document.addEventListener("change",e=>{ const k=e.target.dataset&&e.target.dataset.got; if(!k) return; e.target.checked?got.add(k):got.delete(k); e.target.closest("li").classList.toggle("got",e.target.checked); save(); });
+document.getElementById("dlgBody").addEventListener("click",e=>{ const li=e.target.closest("ol.steps>li"); if(li) li.classList.toggle("done"); });
+document.getElementById("dlgClose").onclick=()=>dlg.close();
+dlg.addEventListener("click",e=>{ if(e.target===dlg) dlg.close(); });
+document.getElementById("dlgAdd").onclick=()=>toggle(current);
+document.getElementById("clearWeek").onclick=()=>{ week.clear(); got.clear(); save(); renderCards(); renderWeek(); };
+document.getElementById("uncheck").onclick=()=>{ got.clear(); save(); renderWeek(); };
+document.getElementById("copyList").onclick=async e=>{
+  const b=e.currentTarget, txt=listText();
+  try{ await navigator.clipboard.writeText(txt); b.textContent="Copied"; }
+  catch(err){ const ta=document.createElement("textarea"); ta.value=txt; document.body.appendChild(ta); ta.select(); try{document.execCommand("copy"); b.textContent="Copied";}catch(_){b.textContent="Select + copy";} ta.remove(); }
+  setTimeout(()=>b.textContent="Copy list",1600);
+};
+
+if(!week.size){ PRESETS[0][1].forEach(id=>week.add(id)); }
+renderCards(); renderWeek();
+</script>
+
+</body>
+</html>
