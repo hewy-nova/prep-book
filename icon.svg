@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" rx="96" fill="#2F6B4F"/>
+  <rect x="112" y="150" width="288" height="72" rx="10" fill="#EBCB73"/>
+  <text x="256" y="203" text-anchor="middle" font-family="Georgia,serif" font-size="46" font-weight="700" fill="#33280C">PREP</text>
+  <rect x="112" y="258" width="288" height="18" rx="9" fill="#FAFBF8" opacity=".9"/>
+  <rect x="112" y="300" width="230" height="18" rx="9" fill="#FAFBF8" opacity=".65"/>
+  <rect x="112" y="342" width="266" height="18" rx="9" fill="#FAFBF8" opacity=".65"/>
+</svg>

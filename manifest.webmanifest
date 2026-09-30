@@ -1,0 +1,13 @@
+{
+  "name": "Matt & Louise Prep Book",
+  "short_name": "Prep Book",
+  "description": "21 meal prep recipes for two, with macros, a weekly planner and a combined Walmart list.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#EDF0EC",
+  "theme_color": "#EDF0EC",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

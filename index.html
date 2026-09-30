@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <style>html{color-scheme:light}body{margin:0;font:14px/1.5 system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Matt &amp; Louise Prep Book</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Prep Book">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#EDF0EC">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=Permanent+Marker&family=JetBrains+Mono:wght@500;700&display=swap">
@@ -115,6 +120,11 @@ ol.steps ol{margin:6px 0 0;padding-left:20px;display:grid;gap:4px;list-style:low
 .dlgfoot .add{border:1px solid var(--accent);background:none;color:var(--accent);padding:8px 16px;border-radius:999px;font-weight:700;cursor:pointer}
 .dlgfoot .add[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
 .hint{font-size:12.5px;color:var(--muted)}
+.linkbtn{border:0;background:none;padding:0;font:inherit;color:var(--accent);font-weight:700;cursor:pointer;text-decoration:underline}
+.banner{font-size:13px;padding:9px 12px;border-radius:8px;margin:10px 0 0;background:var(--sunk);color:var(--muted);display:flex;gap:12px;align-items:baseline;justify-content:space-between}
+.banner .linkbtn{white-space:nowrap;flex:0 0 auto}
+.banner.warn{color:var(--warn)}
+.banner b{color:var(--ink)}
 
 /* planner */
 .planner{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.5fr);gap:20px;align-items:start}
@@ -190,6 +200,7 @@ footer{margin-top:36px;color:var(--muted);font-size:12.5px;max-width:760px}
     </div>
     <a class="weekbtn" href="#week" id="weekJump">This week · 0</a>
   </div>
+  <div id="saveNote" hidden></div>
 
   <section class="block" id="sec-breakfast">
     <div class="sechead"><h2>Breakfast</h2><p>Grab and go. Freeze or fridge, eat cold or reheat in 2–3 min.</p></div>
@@ -287,7 +298,7 @@ footer{margin-top:36px;color:var(--muted);font-size:12.5px;max-width:760px}
     </div>
     <div class="dlgbody" id="dlgBody"></div>
     <div class="dlgfoot">
-      <span class="hint">Tap a step to check it off.</span>
+      <span class="hint" id="dlgProg">Tap a step to check it off.</span>
       <button class="add" id="dlgAdd" aria-pressed="false">+ Add to this week</button>
     </div>
   </div>
@@ -517,10 +528,64 @@ const GEAR = [
 ];
 
 // state
-let week = new Set(), got = new Set(), filter = "all";
-try{ const s = JSON.parse(localStorage.getItem("prep-week")||"[]"); s.forEach(x=>week.add(x)); }catch(e){}
-try{ const g = JSON.parse(localStorage.getItem("prep-got")||"[]"); g.forEach(x=>got.add(x)); }catch(e){}
-const save = () => { try{ localStorage.setItem("prep-week",JSON.stringify([...week])); localStorage.setItem("prep-got",JSON.stringify([...got])); }catch(e){} };
+const SKEY = "prep-state-v1";
+let week = new Set(), got = new Set(), steps = new Set(), filter = "all", open_ = null;
+let storageOK = true, restored = false;
+
+(function load(){
+  let raw = null;
+  try{ raw = localStorage.getItem(SKEY); }
+  catch(e){ storageOK = false; return; }            // private browsing / storage blocked
+  if(raw){
+    try{
+      const s = JSON.parse(raw) || {};
+      (s.week||[]).forEach(x=>week.add(x));
+      (s.got||[]).forEach(x=>got.add(x));
+      (s.steps||[]).forEach(x=>steps.add(x));
+      if(s.filter) filter = s.filter;
+      open_ = s.open || null;
+      restored = week.size>0 || steps.size>0;
+      return;
+    }catch(e){}
+  }
+  try{                                              // migrate the pre-v1 split keys
+    JSON.parse(localStorage.getItem("prep-week")||"[]").forEach(x=>week.add(x));
+    JSON.parse(localStorage.getItem("prep-got")||"[]").forEach(x=>got.add(x));
+    restored = week.size>0;
+  }catch(e){}
+})();
+
+const save = () => {
+  const was = storageOK;
+  try{
+    localStorage.setItem(SKEY, JSON.stringify({
+      week:[...week], got:[...got], steps:[...steps], filter, open:open_, savedAt:Date.now()
+    }));
+    storageOK = true;
+  }catch(e){ storageOK = false; }
+  if(storageOK !== was) saveNote();
+};
+
+// Safari only guarantees script-written storage for 7 days of no interaction with a normal
+// tab; an installed (Add to Home Screen) app is exempt. Say so rather than failing silently.
+function saveNote(){
+  const el = document.getElementById("saveNote");
+  const standalone = window.navigator.standalone === true ||
+    (window.matchMedia && matchMedia("(display-mode: standalone)").matches);
+  if(!storageOK){
+    el.hidden = false;
+    el.className = "banner warn";
+    el.innerHTML = "<span><b>Progress can\u2019t be saved.</b> Safari is blocking storage for this page \u2014 private browsing, or site data turned off. Your picks and checkmarks will vanish when you close the tab.</span>";
+    return;
+  }
+  let dismissed = false;
+  try{ dismissed = localStorage.getItem("prep-installed-hint") === "done"; }catch(e){}
+  if(standalone || dismissed){ el.hidden = true; return; }
+  el.hidden = false;
+  el.className = "banner";
+  el.innerHTML = "<span><b>Keep this across sessions:</b> Share \u2192 Add to Home Screen. Safari can clear a normal tab\u2019s saved progress after about a week; an installed app keeps it.</span>" +
+    "<button class=\"linkbtn\" id=\"hintOK\">Got it</button>";
+}
 const byId = id => R.find(r=>r.id===id);
 const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]));
 const fmt = n => { const r = Math.round(n*100)/100; return (r%1===0? r : r.toFixed(2).replace(/0+$/,"")).toString(); };
@@ -550,15 +615,26 @@ function renderCards(){
   document.getElementById("sec-main").hidden = filter==="breakfast";
 }
 
-function stepHTML(s){
-  if(Array.isArray(s)) return `<li><div class="st">${esc(s[0])}<ol>${s[1].map(x=>`<li>${esc(x)}</li>`).join("")}</ol></div></li>`;
-  return `<li><div class="st">${esc(s)}</div></li>`;
+function stepKey(rid,i){ return rid+":"+i; }
+function stepHTML(s,i,rid){
+  const k = stepKey(rid,i), cls = steps.has(k)?' class="done"':"";
+  const body = Array.isArray(s)
+    ? `${esc(s[0])}<ol>${s[1].map(x=>`<li>${esc(x)}</li>`).join("")}</ol>`
+    : esc(s);
+  return `<li${cls} data-step="${k}"><div class="st">${body}</div></li>`;
+}
+function stepProg(){
+  const r = byId(current); if(!r) return;
+  const done = r.steps.filter((s,i)=>steps.has(stepKey(r.id,i))).length;
+  document.getElementById("dlgProg").innerHTML = done
+    ? `${done} of ${r.steps.length} steps done · <button class="linkbtn" id="resetSteps">Start over</button>`
+    : "Tap a step to check it off.";
 }
 
 const dlg = document.getElementById("dlg");
 let current = null;
 function openRecipe(id){
-  const r = byId(id); current = id;
+  const r = byId(id); current = id; open_ = id; save();
   document.getElementById("dlgTitle").textContent = r.name;
   document.getElementById("dlgStats").innerHTML = stats(r);
   document.getElementById("dlgTags").innerHTML = '<span class="tag five">5 days × 2</span>' + [r.keeps,...r.tags].map(t=>`<span class="tag">${esc(t)}</span>`).join("");
@@ -567,9 +643,10 @@ function openRecipe(id){
     <div class="serve">${esc(serve)}</div>
     <div><h3>Macros</h3>${macroTable(r)}</div>
     <div><h3>Ingredients</h3><ul class="ings">${r.ings.map(([k,,,t])=>{const c=C[k];return `<li><span>${esc(t)}${c[3]?' <span class="pantrytag">· pantry</span>':""}</span><a class="wm" href="${WM(c[1])}" target="_blank" rel="noopener">Walmart ↗</a></li>`}).join("")}</ul></div>
-    <div><h3>Steps</h3><ol class="steps">${r.steps.map(stepHTML).join("")}</ol></div>
+    <div><h3>Steps</h3><ol class="steps">${r.steps.map((s,i)=>stepHTML(s,i,r.id)).join("")}</ol></div>
     ${r.reheat?`<div class="note"><b>Reheat:</b> ${esc(r.reheat)}</div>`:""}`;
   syncDlgAdd();
+  stepProg();
   dlg.showModal();
   document.getElementById("dlgBody").scrollTop = 0;
 }
@@ -636,15 +713,29 @@ document.addEventListener("click",e=>{
   if(!t) return;
   if(t.dataset.open){ openRecipe(t.dataset.open); }
   else if(t.dataset.add){ toggle(t.dataset.add); }
-  else if(t.dataset.preset){ week=new Set(PRESETS[+t.dataset.preset][1]); got.clear(); save(); renderCards(); renderWeek(); }
-  else if(t.classList.contains("chip")){ filter=t.dataset.f; document.querySelectorAll(".chip").forEach(c=>c.setAttribute("aria-pressed",c===t)); renderCards(); }
+  else if(t.dataset.preset){ week=new Set(PRESETS[+t.dataset.preset][1]); got.clear(); steps.clear(); save(); renderCards(); renderWeek(); }
+  else if(t.classList.contains("chip")){ filter=t.dataset.f; save(); syncChips(); renderCards(); }
 });
 document.addEventListener("change",e=>{ const k=e.target.dataset&&e.target.dataset.got; if(!k) return; e.target.checked?got.add(k):got.delete(k); e.target.closest("li").classList.toggle("got",e.target.checked); save(); });
-document.getElementById("dlgBody").addEventListener("click",e=>{ const li=e.target.closest("ol.steps>li"); if(li) li.classList.toggle("done"); });
+document.getElementById("dlgBody").addEventListener("click",e=>{
+  const li=e.target.closest("ol.steps>li"); if(!li) return;
+  const k=li.dataset.step;
+  li.classList.toggle("done") ? steps.add(k) : steps.delete(k);
+  save(); stepProg();
+});
+document.getElementById("dlgProg").addEventListener("click",e=>{
+  if(e.target.id!=="resetSteps") return;
+  const r=byId(current); if(!r) return;
+  r.steps.forEach((s,i)=>steps.delete(stepKey(r.id,i)));
+  save();
+  document.querySelectorAll("#dlgBody ol.steps>li").forEach(li=>li.classList.remove("done"));
+  stepProg();
+});
 document.getElementById("dlgClose").onclick=()=>dlg.close();
+dlg.addEventListener("close",()=>{ open_=null; save(); });
 dlg.addEventListener("click",e=>{ if(e.target===dlg) dlg.close(); });
 document.getElementById("dlgAdd").onclick=()=>toggle(current);
-document.getElementById("clearWeek").onclick=()=>{ week.clear(); got.clear(); save(); renderCards(); renderWeek(); };
+document.getElementById("clearWeek").onclick=()=>{ week.clear(); got.clear(); steps.clear(); open_=null; save(); renderCards(); renderWeek(); };
 document.getElementById("uncheck").onclick=()=>{ got.clear(); save(); renderWeek(); };
 document.getElementById("copyList").onclick=async e=>{
   const b=e.currentTarget, txt=listText();
@@ -653,8 +744,19 @@ document.getElementById("copyList").onclick=async e=>{
   setTimeout(()=>b.textContent="Copy list",1600);
 };
 
-if(!week.size){ PRESETS[0][1].forEach(id=>week.add(id)); }
-renderCards(); renderWeek();
+function syncChips(){ document.querySelectorAll(".chip").forEach(c=>c.setAttribute("aria-pressed", c.dataset.f===filter)); }
+
+document.getElementById("saveNote").addEventListener("click",e=>{
+  if(e.target.id!=="hintOK") return;
+  try{ localStorage.setItem("prep-installed-hint","done"); }catch(err){}
+  document.getElementById("saveNote").hidden = true;
+});
+
+if(!week.size && !restored){ PRESETS[0][1].forEach(id=>week.add(id)); save(); }
+syncChips(); renderCards(); renderWeek(); saveNote();
+
+// pick up mid-cook: reopen the recipe that was open, but only with steps already checked
+if(open_ && byId(open_) && byId(open_).steps.some((s,i)=>steps.has(stepKey(open_,i)))) openRecipe(open_);
 </script>
 
 </body>
